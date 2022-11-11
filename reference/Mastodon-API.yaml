@@ -108,6 +108,49 @@ paths:
         - client-auth: []
       tags:
         - Applications
+  /oauth/authorize:
+    get:
+      summary: Authorize a user
+      responses:
+        '200':
+          description: |-
+            The authorization code will be returned as a query parameter named `code`.
+
+            ```
+            redirect_uri?code=qDFUEaYrRK5c-HNmTCJbAzazwLRInJ7VHFat0wcMgCU
+            ```
+      operationId: get-oauth-authorize
+      description: 'Displays an authorization form to the user. If approved, it will create and return an authorization code, then redirect to the desired redirect_uri, or show the authorization code if urn:ietf:wg:oauth:2.0:oob was requested. The authorization code can be used while requesting a token to obtain access to user-level methods.'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                response_type:
+                  type: string
+                  enum:
+                    - code
+                  description: Should be equal to `code`.
+                client_id:
+                  type: string
+                  description: 'Client ID, obtained during app registration.'
+                redirect_uri:
+                  type: string
+                  format: uri
+                  description: 'Set a URI to redirect the user to. If this parameter is set to `urn:ietf:wg:oauth:2.0:oob` then the authorization code will be shown instead. Must match one of the redirect URIs declared during app registration.'
+                scope:
+                  type: string
+                  description: 'List of requested OAuth scopes, separated by spaces. Must be a subset of scopes declared during app registration. If not provided, defaults to `read`.'
+                force_login:
+                  type: boolean
+                  description: 'Added in `2.6.0`. Forces the user to re-login, which is necessary for authorizing with multiple accounts from the same instance.'
+              required:
+                - response_type
+                - client_id
+                - redirect_uri
+      tags:
+        - OAuth
 components:
   schemas:
     Application:
@@ -204,4 +247,5 @@ components:
                 error: The access token is invalid
 tags:
   - name: Applications
+  - name: OAuth
 security: []
