@@ -151,6 +151,97 @@ paths:
                 - redirect_uri
       tags:
         - OAuth
+  /oauth/token:
+    post:
+      summary: Obtain a token
+      responses:
+        '200':
+          description: Store the result of this for later use with auth-required methods.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Access-Token'
+              examples:
+                Example 1:
+                  value:
+                    access_token: ZA-Yj3aBD8U8Cm7lKUp-lm9O9BmDgdhHzDeqsY8tlL0
+                    token_type: Bearer
+                    scope: read write follow push
+                    created_at: 1573979017
+        '400':
+          description: 'If you try to request a scope that was not included when registering the app, the request will fail.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+              examples:
+                Invalid Scope Error:
+                  value:
+                    error: invalid_scope
+                    error_description: 'The requested scope is invalid, unknown, or malformed.'
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+      operationId: post-oauth-token
+      description: 'Returns an access token, to be used during API calls that are not public.'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    client_id:
+                      type: string
+                      description: 'Client ID, obtained during app registration.'
+                    client_secret:
+                      type: string
+                      description: 'Client secret, obtained during app registration.'
+                    redirect_uri:
+                      type: string
+                      description: 'Set a URI to redirect the user to. If this parameter is set to `urn:ietf:wg:oauth:2.0:oob` then the token will be shown instead. Must match one of the redirect URIs declared during app registration.'
+                    scope:
+                      type: string
+                      description: 'List of requested OAuth scops, separated by spaces. Must be a subset of scopes declared during app registration. If not provided, defaults to `read`.'
+                  required:
+                    - client_id
+                    - client_secret
+                    - redirect_uri
+                - oneOf:
+                    - type: object
+                      description: Used for the `authorization_code` flow to gain user-level access.
+                      properties:
+                        grant_type:
+                          type: string
+                          enum:
+                            - authorization_code
+                          description: Set equal to `authorization_code` if `code` is provided in order to gain user-level access.
+                        code:
+                          type: string
+                          description: 'A user authorization code, obtained via `/oauth/authorize`.'
+                      required:
+                        - grant_type
+                        - code
+                    - type: object
+                      description: Used for `client_credentials` flow for app-level access only.
+                      properties:
+                        grant_type:
+                          type: string
+                          enum:
+                            - client_credentials
+                          description: Set equal to `client_credentials` to obtain app-level access only.
+                      required:
+                        - grant_type
+        description: ''
+      tags:
+        - OAuth
 components:
   schemas:
     Application:
