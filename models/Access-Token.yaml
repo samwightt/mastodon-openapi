@@ -1,0 +1,26 @@
+title: Access Token
+x-stoplight:
+  id: xgqqvfze4obbe
+x-tags:
+  - OAuth
+type: object
+properties:
+  access_token:
+    type: string
+    description: An OAuth token to be used for authorization.
+  token_type:
+    type: string
+    description: The OAuth token type. Mastodon uses `Bearer` tokens.
+    enum:
+      - Bearer
+  scope:
+    type: string
+    description: 'The OAuth scopes granted by this token, space-separated.'
+  created_at:
+    type: number
+    description: When the token was generated (UNIX Timestamp).
+required:
+  - access_token
+  - token_type
+  - scope
+  - created_at
