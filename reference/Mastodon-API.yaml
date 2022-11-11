@@ -20,8 +20,8 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: ../models/Application.yaml
-                  - $ref: ../models/Client-Credentials.yaml
+                  - $ref: '#/components/schemas/Application'
+                  - $ref: '#/components/schemas/Client-Credentials'
                   - type: object
                     properties:
                       id:
@@ -83,8 +83,125 @@ paths:
                 - redirect_uris
       tags:
         - Applications
+  /api/v1/apps/verify_credentials:
+    get:
+      summary: Verify your app works
+      responses:
+        '200':
+          description: 'If the Authorization header was provided with a valid token, you should see your app returned as an Application entity.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              examples:
+                Example 1:
+                  value:
+                    name: test app
+                    website: null
+                    vapid_key: BCk-QqERU0q-CfYZjcuB6lnyyOYfJ2AifKqfeGIm7Z-HiTU5T9eTG5GxVA0_OH5mMlI4UkkDTpaZwozy0TzdZ2M=
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+      operationId: get-api-v1-apps-verify_credentials
+      description: Confirm that the app's OAuth2 credentials work.
+      parameters: []
+      security:
+        - client-auth: []
+      tags:
+        - Applications
 components:
-  schemas: {}
+  schemas:
+    Application:
+      title: Application
+      x-stoplight:
+        id: s0e4fxq0juzns
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of your application.
+        website:
+          type: string
+          nullable: true
+          description: The website associated with your application.
+          format: uri
+        vapid_key:
+          type: string
+          description: ' Used for Push Streaming API. Returned with POST /api/v1/apps. Equivalent to PushSubscription#server_key.'
+      required:
+        - name
+      description: Represents an application that interfaces with the REST API to access accounts or post statuses.
+    Access-Token:
+      title: App-Token
+      x-stoplight:
+        id: ncqgsrz14ym19
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: An OAuth token to be used for authorization.
+        token_type:
+          type: string
+          description: The OAuth token type. Mastodon uses `Bearer` tokens.
+          enum:
+            - Bearer
+        scope:
+          type: string
+          description: 'The OAuth scopes granted by this token, space-separated.'
+        created_at:
+          type: number
+          description: When the token was generated (UNIX Timestamp).
+      required:
+        - access_token
+        - token_type
+        - scope
+        - created_at
+    Client-Credentials:
+      title: Client-Credentials
+      x-stoplight:
+        id: nvyokwqza0vca
+      type: object
+      properties:
+        client_id:
+          type: string
+          description: 'Client ID key, to be used for obtaining OAuth tokens.'
+        client_secret:
+          type: string
+          description: 'Client secret key, to be used for obtaining OAuth tokens.'
+      required:
+        - client_id
+        - client_secret
+      description: Client credentials returned when creating an app.
+      examples:
+        - client_id: TWhM-tNSuncnqN7DBJmoyeLnk6K3iJJ71KKXxgL1hPM
+          client_secret: ZEaFUFmF0umgBX1qKJDjaU99Q31lDkOU8NutzTOoliw
   requestBodies: {}
+  securitySchemes:
+    client-auth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: ''
+          refreshUrl: ''
+          scopes: {}
+    app-token:
+      type: http
+      scheme: bearer
+  responses:
+    Invalid-Authentication-Token:
+      description: 'If the Authorization header contains an invalid token, is malformed, or is not present, an error will be returned indicating an authorization failure.'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+            required:
+              - error
+          examples:
+            Response:
+              value:
+                error: The access token is invalid
 tags:
   - name: Applications
+security: []
