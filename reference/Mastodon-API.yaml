@@ -297,29 +297,1040 @@ paths:
                 - token
       security:
         - client-auth: []
-        - user-auth: []
+  /api/v1/accounts:
+    post:
+      summary: Register an account
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Account creation was successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Access-Token'
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+        '422':
+          description: There were validation errors when trying to create the account.
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    error: 'Validation failed: E-mail address can''t be blank, Password can''t be blank, Username can''t be blank, Service agreement must be accepted'
+                    details:
+                      email:
+                        - error: ERR_BLANK
+                          description: can't be blank
+                      password:
+                        - error: ERR_BLANK
+                          description: can't be blank
+                      username:
+                        - error: ERR_BLANK
+                          description: can't be blank
+                      agreement:
+                        - error: ERR_ACCEPTED
+                          description: must be accepted
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            description:
+                              type: string
+                          required:
+                            - error
+                            - description
+                      password:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            description:
+                              type: string
+                          required:
+                            - error
+                            - description
+                      username:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            description:
+                              type: string
+                          required:
+                            - error
+                            - description
+                      agreement:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            description:
+                              type: string
+                          required:
+                            - error
+                            - description
+                required:
+                  - error
+                  - details
+      operationId: post-api-v1-accounts
+      description: Creates a user and account records.
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The desired username for the account.
+                email:
+                  type: string
+                  description: The email address to be used for login.
+                  format: email
+                password:
+                  type: string
+                  description: The password to be used for login.
+                agreement:
+                  type: boolean
+                  description: 'Whether the user agrees to the local rules, terms, and policies. **These should be presented to the user in order to allow them to consent before setting this parameter to `true`**.'
+                locale:
+                  type: string
+                  description: The language of the confirmation email that will be sent.
+                reason:
+                  type: string
+                  description: Text that will be reviewed by moderators if registrations require manual approval.
+              required:
+                - username
+                - email
+                - password
+                - agreement
+      security:
+        - client-auth:
+            - 'write:accounts'
+  /api/v1/accounts/verify_credentials:
+    get:
+      summary: Verify account credentials
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: |-
+            Success.
+
+            Note the extra `source` property, which is not visible on accounts other than your own. Also note that plain-text is used within `source` and HTML is used for their corresponding properties such as note` and `fields`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Account'
+                  - type: object
+                    properties:
+                      source:
+                        $ref: '#/components/schemas/Source'
+              examples:
+                Successful response:
+                  value:
+                    id: '14715'
+                    username: trwnh
+                    acct: trwnh
+                    display_name: infinite love ⴳ
+                    locked: false
+                    bot: false
+                    created_at: '2016-11-24T10:02:12.085Z'
+                    note: '<p>i have approximate knowledge of many things. perpetual student. (nb/ace/they)</p><p>xmpp/email: a@trwnh.com<br /><a href="https://trwnh.com" rel="nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">trwnh.com</span><span class="invisible"></span></a><br />help me live: <a href="https://liberapay.com/at" rel="nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">liberapay.com/at</span><span class="invisible"></span></a> or <a href="https://paypal.me/trwnh" rel="nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">paypal.me/trwnh</span><span class="invisible"></span></a></p><p>- my triggers are moths and glitter<br />- i have all notifs except mentions turned off, so please interact if you wanna be friends! i literally will not notice otherwise<br />- dm me if i did something wrong, so i can improve<br />- purest person on fedi, do not lewd in my presence<br />- #1 ami cole fan account</p><p>:fatyoshi:</p>'
+                    url: 'https://mastodon.social/@trwnh'
+                    avatar: 'https://files.mastodon.social/accounts/avatars/000/014/715/original/34aa222f4ae2e0a9.png'
+                    avatar_static: 'https://files.mastodon.social/accounts/avatars/000/014/715/original/34aa222f4ae2e0a9.png'
+                    header: 'https://files.mastodon.social/accounts/headers/000/014/715/original/5c6fc24edb3bb873.jpg'
+                    header_static: 'https://files.mastodon.social/accounts/headers/000/014/715/original/5c6fc24edb3bb873.jpg'
+                    followers_count: 821
+                    following_count: 178
+                    statuses_count: 33120
+                    last_status_at: '2019-11-24T15:49:42.251Z'
+                    source:
+                      privacy: public
+                      sensitive: false
+                      language: ''
+                      note: "i have approximate knowledge of many things. perpetual student. (nb/ace/they)\r\n\r\nxmpp/email: a@trwnh.com\r\nhttps://trwnh.com\r\nhelp me live: https://liberapay.com/at or https://paypal.me/trwnh\r\n\r\n- my triggers are moths and glitter\r\n- i have all notifs except mentions turned off, so please interact if you wanna be friends! i literally will not notice otherwise\r\n- dm me if i did something wrong, so i can improve\r\n- purest person on fedi, do not lewd in my presence\r\n- #1 ami cole fan account\r\n\r\n:fatyoshi:"
+                      fields:
+                        - name: Website
+                          value: 'https://trwnh.com'
+                          verified_at: '2019-08-29T04:14:55.571+00:00'
+                        - name: Sponsor
+                          value: 'https://liberapay.com/at'
+                          verified_at: '2019-11-15T10:06:15.557+00:00'
+                        - name: 'Fan of:'
+                          value: 'Punk-rock and post-hardcore (Circa Survive, letlive., La Dispute, THE FEVER 333)Manga (Yu-Gi-Oh!, One Piece, JoJo''s Bizarre Adventure, Death Note, Shaman King)Platformers and RPGs (Banjo-Kazooie, Boktai, Final Fantasy Crystal Chronicles)'
+                          verified_at: null
+                        - name: 'Main topics:'
+                          value: 'systemic analysis, design patterns, anticapitalism, info/tech freedom, theory and philosophy, and otherwise being a genuine and decent wholesome poster. i''m just here to hang out and talk to cool people!'
+                          verified_at: null
+                      follow_requests_count: 0
+                    emojis:
+                      - shortcode: fatyoshi
+                        url: 'https://files.mastodon.social/custom_emojis/images/000/023/920/original/e57ecb623faa0dc9.png'
+                        static_url: 'https://files.mastodon.social/custom_emojis/images/000/023/920/static/e57ecb623faa0dc9.png'
+                        visible_in_picker: true
+                    fields:
+                      - name: Website
+                        value: '<a href="https://trwnh.com" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">trwnh.com</span><span class="invisible"></span></a>'
+                        verified_at: '2019-08-29T04:14:55.571+00:00'
+                      - name: Sponsor
+                        value: '<a href="https://liberapay.com/at" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">liberapay.com/at</span><span class="invisible"></span></a>'
+                        verified_at: '2019-11-15T10:06:15.557+00:00'
+                      - name: 'Fan of:'
+                        value: 'Punk-rock and post-hardcore (Circa Survive, letlive., La Dispute, THE FEVER 333)Manga (Yu-Gi-Oh!, One Piece, JoJo&apos;s Bizarre Adventure, Death Note, Shaman King)Platformers and RPGs (Banjo-Kazooie, Boktai, Final Fantasy Crystal Chronicles)'
+                        verified_at: null
+                      - name: 'Main topics:'
+                        value: 'systemic analysis, design patterns, anticapitalism, info/tech freedom, theory and philosophy, and otherwise being a genuine and decent wholesome poster. i&apos;m just here to hang out and talk to cool people!'
+                        verified_at: null
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+        '403':
+          description: 'Your user account is currently disabled, missing a confirmed email address, or pending approval.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                Account is disabled:
+                  value:
+                    error: Your login is currently disabled
+                Account is unconfirmed:
+                  value:
+                    error: Your login is missing a confirmed e-mail address
+                Account is unapproved:
+                  value:
+                    error: Your login is currently pending approval
+      operationId: get-api-v1-accounts-verify_credentials
+      security:
+        - user-token-auth:
+            - read
+            - 'read:accounts'
+      parameters: []
+      description: Test to make sure that the user token works.
+  /api/v1/accounts/update_credentials:
+    patch:
+      summary: Update account credentials
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Fields were saved successfully.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Account'
+                  - type: object
+                    properties:
+                      source:
+                        $ref: '#/components/schemas/Source'
+                    required:
+                      - source
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+      operationId: patch-api-v1-accounts-update_credentials
+      description: |-
+        Update the user's display and preferences.
+
+        You should use `/api/v1/apps/verify_credentials` to first obtain plaintext representations from within the `source` parameter, then allow the user to edit these plaintext representations before submitting them through this API. The server will generate the corresponding HTML.
+      security:
+        - user-token-auth:
+            - 'write:accounts'
+            - write
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                discoverable:
+                  type: boolean
+                  description: Whether the account should be shown in the user profile directory.
+                bot:
+                  type: boolean
+                  description: Whether the account has a bot flag.
+                display_name:
+                  type: string
+                  description: The display name to use for the profile.
+                note:
+                  type: string
+                  description: The account bio.
+                avatar:
+                  type: string
+                  description: Avatar image encoded using multipart / form data.
+                header:
+                  type: string
+                  description: Header image encoded using multipart / form data.
+                locked:
+                  type: boolean
+                  description: Whether manual approval of follow requests is required.
+                source:
+                  type: object
+                  properties:
+                    privacy:
+                      type: string
+                      description: Default post privacy for authored statuses.
+                    sensitive:
+                      type: boolean
+                      description: Whether to mark authored statuses as sensitive by default.
+                    language:
+                      type: string
+                      description: Default language to use for authored statuses (ISO 6391).
+                fields_attributes:
+                  type: array
+                  description: 'Profile metadata `name` and `value`. (By default, max 4 fields and 255 characters per property / value).'
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of the field.
+                      value:
+                        type: string
+                        description: Value of the field.
+        description: ''
+  '/api/v1/accounts/{id}':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    get:
+      summary: Get account profile
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Account record will be returned. Note that `acct` of local users does not include the domain name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              examples:
+                Local user:
+                  value:
+                    id: '1'
+                    username: Gargron
+                    acct: Gargron
+                    display_name: Eugen
+                    locked: false
+                    bot: false
+                    created_at: '2016-03-16T14:34:26.392Z'
+                    note: '<p>Developer of Mastodon and administrator of mastodon.social. I post service announcements, development updates, and personal stuff.</p>'
+                    url: 'https://mastodon.social/@Gargron'
+                    avatar: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+                    avatar_static: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+                    header: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+                    header_static: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+                    followers_count: 318699
+                    following_count: 453
+                    statuses_count: 61013
+                    last_status_at: '2019-11-30T20:02:08.277Z'
+                    emojis: []
+                    fields:
+                      - name: Patreon
+                        value: '<a href="https://www.patreon.com/mastodon" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://www.</span><span class="">patreon.com/mastodon</span><span class="invisible"></span></a>'
+                        verified_at: null
+                      - name: Homepage
+                        value: '<a href="https://zeonfederated.com" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">zeonfederated.com</span><span class="invisible"></span></a>'
+                        verified_at: '2019-07-15T18:29:57.191+00:00'
+                Remote user:
+                  value:
+                    id: '23634'
+                    username: noiob
+                    acct: noiob@awoo.space
+                    display_name: shork
+                    locked: false
+                    bot: false
+                    created_at: '2017-02-08T02:00:53.274Z'
+                    note: '<p>:ms_rainbow_flag:​ :ms_bisexual_flag:​ :ms_nonbinary_flag:​ <a href="https://awoo.space/tags/awoo" class="mention hashtag" rel="nofollow noopener noreferrer" target="_blank">#<span>awoo</span></a>.space <a href="https://awoo.space/tags/admin" class="mention hashtag" rel="nofollow noopener noreferrer" target="_blank">#<span>admin</span></a> ~ <a href="https://awoo.space/tags/bi" class="mention hashtag" rel="nofollow noopener noreferrer" target="_blank">#<span>bi</span></a> ~ <a href="https://awoo.space/tags/nonbinary" class="mention hashtag" rel="nofollow noopener noreferrer" target="_blank">#<span>nonbinary</span></a> ~ compsci student ~ likes video <a href="https://awoo.space/tags/games" class="mention hashtag" rel="nofollow noopener noreferrer" target="_blank">#<span>games</span></a> and weird/ old electronics and will post obsessively about both ~ avatar by <span class="h-card"><a href="https://weirder.earth/@dzuk" class="u-url mention" rel="nofollow noopener noreferrer" target="_blank">@<span>dzuk</span></a></span></p>'
+                    url: 'https://awoo.space/@noiob'
+                    avatar: 'https://files.mastodon.social/accounts/avatars/000/023/634/original/6ca8804dc46800ad.png'
+                    avatar_static: 'https://files.mastodon.social/accounts/avatars/000/023/634/original/6ca8804dc46800ad.png'
+                    header: 'https://files.mastodon.social/accounts/headers/000/023/634/original/256eb8d7ac40f49a.png'
+                    header_static: 'https://files.mastodon.social/accounts/headers/000/023/634/original/256eb8d7ac40f49a.png'
+                    followers_count: 553
+                    following_count: 405
+                    statuses_count: 28982
+                    last_status_at: '2019-12-01T00:39:57.264Z'
+                    emojis:
+                      - shortcode: ms_rainbow_flag
+                        url: 'https://files.mastodon.social/custom_emojis/images/000/028/691/original/6de008d6281f4f59.png'
+                        static_url: 'https://files.mastodon.social/custom_emojis/images/000/028/691/static/6de008d6281f4f59.png'
+                        visible_in_picker: true
+                      - shortcode: ms_bisexual_flag
+                        url: 'https://files.mastodon.social/custom_emojis/images/000/050/744/original/02f94a5fca7eaf78.png'
+                        static_url: 'https://files.mastodon.social/custom_emojis/images/000/050/744/static/02f94a5fca7eaf78.png'
+                        visible_in_picker: true
+                      - shortcode: ms_nonbinary_flag
+                        url: 'https://files.mastodon.social/custom_emojis/images/000/105/099/original/8106088bd4782072.png'
+                        static_url: 'https://files.mastodon.social/custom_emojis/images/000/105/099/static/8106088bd4782072.png'
+                        visible_in_picker: true
+                    fields:
+                      - name: Pronouns
+                        value: they/them
+                        verified_at: null
+                      - name: Alt
+                        value: '<span class="h-card"><a href="https://cybre.space/@noiob" class="u-url mention" rel="nofollow noopener noreferrer" target="_blank">@<span>noiob</span></a></span>'
+                        verified_at: null
+                      - name: Bots
+                        value: '<span class="h-card"><a href="https://botsin.space/@darksouls" class="u-url mention" rel="nofollow noopener noreferrer" target="_blank">@<span>darksouls</span></a></span>, <span class="h-card"><a href="https://botsin.space/@nierautomata" class="u-url mention" rel="nofollow noopener noreferrer" target="_blank">@<span>nierautomata</span></a></span>, code for <span class="h-card"><a href="https://botsin.space/@awoobot" class="u-url mention" rel="nofollow noopener noreferrer" target="_blank">@<span>awoobot</span></a></span>'
+                        verified_at: null
+                      - name: Website
+                        value: '<a href="http://shork.xyz" rel="nofollow noopener noreferrer" target="_blank"><span class="invisible">http://</span><span class="">shork.xyz</span><span class="invisible"></span></a>'
+                        verified_at: '2019-11-23T20:25:47.907+00:00'
+                Suspended user:
+                  value:
+                    id: '14'
+                    username: stigatle
+                    acct: stigatle@quitter.no
+                    display_name: ''
+                    locked: false
+                    bot: false
+                    discoverable: false
+                    group: false
+                    created_at: '2016-03-18T10:04:51.700Z'
+                    note: ''
+                    url: 'https://quitter.no/stigatle'
+                    avatar: 'https://mastodon.social/avatars/original/missing.png'
+                    avatar_static: 'https://mastodon.social/avatars/original/missing.png'
+                    header: 'https://mastodon.social/headers/original/missing.png'
+                    header_static: 'https://mastodon.social/headers/original/missing.png'
+                    followers_count: 0
+                    following_count: 0
+                    statuses_count: 0
+                    last_status_at: null
+                    suspended: true
+                    emojis: []
+                    fields: []
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+        '404':
+          description: Account does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account is suspended
+      operationId: get-api-v1-accounts-id
+      description: View information about a profile.
+  '/api/v1/accounts/{id}/statuses':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    get:
+      summary: Statuses for user
+      tags:
+        - Statuses
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        '401':
+          description: 'Instance is in whitelist mode or running a version of Mastodon older than 2.7.0, and the Authorization header is invalid or missing.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                whitelist:
+                  value:
+                    error: This API requires an authenticated user.
+                pre-2.7.0:
+                  value:
+                    error: The access token is invalid
+        '404':
+          description: Account is deleted or does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account is suspended.
+      operationId: get-api-v1-accounts-id-statuses
+      description: |-
+        Statuses posted to the given account.
+
+        Public for public statuses only, or user_token + read:statuses (for private statuses the user is authorized to see).
+      security:
+        - user-token-auth:
+            - 'read:statuses'
+      parameters: []
+  '/api/v1/accounts/{id}/followers':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    get:
+      summary: Get account's followers.
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Success
+          headers:
+            Link:
+              schema:
+                type: string
+              description: 'Because the ID of follow relationships is not generally used or provided with any API calls, an HTTP `Link` header is used instead to indicate next and previous pages. You will have to parse this header yourself to extract the paging URLs. Format: <url>; rel="next", <url>; rel="prev"'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                Limit=2:
+                  value:
+                    - id: '1020382'
+                      username: atul13061987
+                      acct: atul13061987
+                      display_name: ''
+                      locked: false
+                      bot: false
+                      created_at: '2019-12-04T07:17:02.745Z'
+                      note: <p></p>
+                      url: 'https://mastodon.social/@atul13061987'
+                      avatar: 'https://mastodon.social/avatars/original/missing.png'
+                      avatar_static: 'https://mastodon.social/avatars/original/missing.png'
+                      header: 'https://mastodon.social/headers/original/missing.png'
+                      header_static: 'https://mastodon.social/headers/original/missing.png'
+                      followers_count: 0
+                      following_count: 2
+                      statuses_count: 0
+                      last_status_at: null
+                      emojis: []
+                      fields: []
+                    - id: '1020381'
+                      username: linuxliner
+                      acct: linuxliner
+                      display_name: ''
+                      locked: false
+                      bot: false
+                      created_at: '2019-12-04T07:15:56.426Z'
+                      note: <p></p>
+                      url: 'https://mastodon.social/@linuxliner'
+                      avatar: 'https://mastodon.social/avatars/original/missing.png'
+                      avatar_static: 'https://mastodon.social/avatars/original/missing.png'
+                      header: 'https://mastodon.social/headers/original/missing.png'
+                      header_static: 'https://mastodon.social/headers/original/missing.png'
+                      followers_count: 0
+                      following_count: 2
+                      statuses_count: 0
+                      last_status_at: null
+                      emojis: []
+                      fields: []
+        '401':
+          description: 'Invalid or missing Authorization header, or instance is in whitelist mode and your token is not authorized with a user.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                header:
+                  value:
+                    error: The access token is invalid
+                whitelist:
+                  value:
+                    error: This API requires an authenticated user
+        '404':
+          description: Account is deleted or does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account is suspended.
+      operationId: get-api-v1-accounts-id-followers
+      description: 'Accounts which follow the given account, if network is not hidden by the account owner.'
+      security:
+        - client-auth:
+            - 'read:accounts'
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                max_id:
+                  type: string
+                  description: '**Internal parameter**. Use HTTP `Link` header for pagination.'
+                since_id:
+                  type: string
+                  description: '**Internal parameter**. Use HTTP `Link` header for pagination.'
+                limit:
+                  type: integer
+                  description: Maximum number of results to return.
+                  default: 40
+  '/api/v1/accounts/{id}/following':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    get:
+      summary: List users following account
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          headers:
+            Link:
+              schema:
+                type: string
+              description: 'Because the ID of follow relationships is not generally used or provided with any API calls, an HTTP `Link` header is used instead to indicate the next and previous pages. You will have to parse this header yourself to extract the paging URLs. Format: <url>; rel="next", <url>; rel="prev"'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+              examples:
+                Example 1:
+                  value:
+                    - id: '963410'
+                      username: gautambhatia
+                      acct: gautambhatia
+                      display_name: Gautam Bhatia
+                      locked: false
+                      bot: false
+                      created_at: '2019-11-07T13:06:57.442Z'
+                      note: '<p>SF reader, editor, and writer.</p>'
+                      url: 'https://mastodon.social/@gautambhatia'
+                      avatar: 'https://files.mastodon.social/accounts/avatars/000/963/410/original/d8e0fd5cefcf9687.jpg'
+                      avatar_static: 'https://files.mastodon.social/accounts/avatars/000/963/410/original/d8e0fd5cefcf9687.jpg'
+                      header: 'https://mastodon.social/headers/original/missing.png'
+                      header_static: 'https://mastodon.social/headers/original/missing.png'
+                      followers_count: 1900
+                      following_count: 52
+                      statuses_count: 183
+                      last_status_at: '2019-12-02T17:52:39.463Z'
+                      emojis: []
+                      fields: []
+                    - id: '1007400'
+                      username: seafrog
+                      acct: seafrog@glitterkitten.co.uk
+                      display_name: "\U0001F413\U0001F983 Heck Partridge \U0001F920 \U0001F986"
+                      locked: false
+                      bot: false
+                      created_at: '2019-11-19T18:46:49.977Z'
+                      note: '<p>hi im elise!! this is scribblefrog''s new account</p><p>she/her, 27</p>'
+                      url: 'https://glitterkitten.co.uk/@seafrog'
+                      avatar: 'https://files.mastodon.social/accounts/avatars/001/007/400/original/306cd22c1b118693.png'
+                      avatar_static: 'https://files.mastodon.social/accounts/avatars/001/007/400/original/306cd22c1b118693.png'
+                      header: 'https://files.mastodon.social/accounts/headers/001/007/400/original/fd9728559f7265f5.jpeg'
+                      header_static: 'https://files.mastodon.social/accounts/headers/001/007/400/original/fd9728559f7265f5.jpeg'
+                      followers_count: 168
+                      following_count: 223
+                      statuses_count: 944
+                      last_status_at: '2019-12-04T00:44:08.603Z'
+                      emojis: []
+                      fields:
+                        - name: gotdamb
+                          value: frog
+                          verified_at: null
+                        - name: whomst lov
+                          value: the oceane
+                          verified_at: null
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                header:
+                  value:
+                    error: The access token is invalid
+                whitelist:
+                  value:
+                    error: This API requires an authenticated user
+        '404':
+          description: Account is deleted or does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account is suspended.
+      operationId: get-api-v1-accounts-id-following
+      description: 'Accounts which the given account is following, if network is not hidden by the account owner.'
+      security:
+        - client-auth:
+            - 'read:accounts'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                max_id:
+                  type: string
+                  description: '**Internal parameter**. Use HTTP `Link` header for pagination.'
+                since_id:
+                  type: string
+                  description: '**Internal parameter**. Use HTTP `Link` header for pagination.'
+                limit:
+                  type: integer
+                  default: 40
+                  description: Maximum number of results to return.
+  '/api/v1/accounts/{id}/featured_tags':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Featured tags
+      tags:
+        - Tags
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Featured-Tag'
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+      operationId: get-api-v1-accounts-id-featured_tags
+      description: Tags featured by this account.
+      security:
+        - user-token-auth:
+            - 'read:accounts'
+      parameters: []
+  '/api/v1/accounts/{id}/lists':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+    get:
+      summary: Lists containing this account
+      tags:
+        - Lists
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: 'If the account is part of any lists, those entities will be returned. If the account is not part of any of your lists, then an empty array will be returned.'
+                items:
+                  $ref: '#/components/schemas/List'
+              examples:
+                Part of lists:
+                  value:
+                    - id: '13694'
+                      title: dev
+                Not in any lists.:
+                  value: []
+        '401':
+          $ref: '#/components/responses/Invalid-Authentication-Token'
+        '404':
+          description: Account with given id does not exist or is deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account with given id is suspended.
+      operationId: get-api-v1-accounts-id-lists
+      description: User lists that you have added this account to.
+      security:
+        - user-token-auth:
+            - 'read:lists'
+      parameters: []
+  '/api/v1/accounts/{id}/identity_proofs':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    get:
+      summary: Identity proofs for account
+      tags:
+        - Identity Proofs
+        - Accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Identity-Proof'
+              examples:
+                Example 1:
+                  value:
+                    - provider: Keybase
+                      provider_username: gargron
+                      updated_at: '2019-07-21T20:14:39.596Z'
+                      proof_url: 'https://keybase.io/gargron/sigchain#5cfc20c7018f2beefb42a68836da59a792e55daa4d118498c9b1898de7e845690f'
+                      profile_url: 'https://keybase.io/gargron'
+        '404':
+          description: Account with given id is deleted or does not exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                Example 1:
+                  value:
+                    error: Record not found
+        '410':
+          description: Account with given id is suspended.
+        '422':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    error: This method requires an authenticated user
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: This method requires an authenticated user
+      operationId: get-api-v1-accounts-id-identity_proofs
+      security:
+        - user-token-auth: []
+      description: Get the identity proofs for an account.
+  '/api/v1/accounts/{id}/follow':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    post:
+      summary: Follow account
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: 'Successfully followed, or account was already followed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+        '403':
+          description: Trying to follow someone that you block or that blocks you.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: This action is not allowed
+      operationId: post-api-v1-accounts-id-follow
+      security:
+        - user-token-auth:
+            - 'write:follows'
+            - follow
+      parameters: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                reblogs:
+                  type: boolean
+                  description: Receive this account's reblogs in home timeline?
+                  default: true
+                notify:
+                  type: boolean
+                  default: false
+                  description: Receive notifications when this account posts a status?
+      description: Follows the given account. Can be used to update whether ot show reblogs or enable notifications.
+  '/api/v1/accounts/{id}/unfollow':
+    parameters:
+      - schema:
+          type: string
+        name: id
+        in: path
+        required: true
+        description: The id of the account in the database.
+    post:
+      summary: Unfollow
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: 'Successfully unfollowed, or account was already not followed.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+              examples:
+                Example 1:
+                  value:
+                    id: '3'
+                    following: false
+                    showing_reblogs: false
+                    notifying: false
+                    followed_by: false
+                    blocking: false
+                    blocked_by: false
+                    muting: false
+                    muting_notifications: false
+                    requested: false
+                    domain_blocking: false
+                    endorsed: false
+        '401':
+          description: Invalid or missing Authorization header.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+              examples:
+                Example 1:
+                  value:
+                    error: The access token is invalid
+      operationId: post-api-v1-accounts-id-unfollow
+      description: Unfollow the given account.
+      security:
+        - user-token-auth:
+            - 'write:follows'
+            - follow
+      parameters: []
 components:
   schemas:
-    Application:
-      title: Application
-      x-stoplight:
-        id: s0e4fxq0juzns
-      type: object
-      properties:
-        name:
-          type: string
-          description: The name of your application.
-        website:
-          type: string
-          nullable: true
-          description: The website associated with your application.
-          format: uri
-        vapid_key:
-          type: string
-          description: ' Used for Push Streaming API. Returned with POST /api/v1/apps. Equivalent to PushSubscription#server_key.'
-      required:
-        - name
-      description: Represents an application that interfaces with the REST API to access accounts or post statuses.
     Access-Token:
       title: App-Token
       x-stoplight:
@@ -345,6 +1356,277 @@ components:
         - token_type
         - scope
         - created_at
+    Account:
+      title: Account
+      x-stoplight:
+        id: 9bgeu11t3p4j6
+      type: object
+      properties:
+        id:
+          type: string
+          description: The account id `header`. Cast from an integer but not guaranteed to be a number.
+          example: '23634'
+        username:
+          type: string
+          description: 'The username of the account, **not including the domain**.'
+        acct:
+          type: string
+          description: 'The webfinger account URI. Equal to `username` for local users, or `username@domain` for remote users.'
+        url:
+          type: string
+          description: The location of the user's profile page (HTTPS URI).
+          format: uri
+        moved:
+          $ref: '#/components/schemas/Account'
+        fields:
+          $ref: '#/components/schemas/Field'
+        bot:
+          type: boolean
+          description: 'A presentational flag. Indicates that the account may perform automated actions, may not be monitored, or identifies as a robot.'
+        suspended:
+          type: boolean
+          description: An extra entity returned when an account is suspended.
+        mute_expires_at:
+          type: string
+          format: date-time
+          description: 'When a timed mute will expire, if applicable (ISO 8601 Datetime).'
+        created_at:
+          type: string
+          format: date-time
+          description: When the account was created (ISO 8601 Datetime).
+        last_status_at:
+          type: string
+          format: date-time
+          description: When the most recent status was posted (ISO 8601 Datetime).
+        statuses_count:
+          type: number
+          description: How many statuses are attached to this account.
+          minimum: 0
+        followers_count:
+          type: number
+          description: The reported followers of this profile.
+          minimum: 0
+        following_count:
+          type: number
+          description: The reported follows of this profile.
+          minimum: 0
+        display_name:
+          type: string
+          description: The profile's display name.
+        note:
+          type: string
+          description: The profile's bio / description (HTML string).
+        avatar:
+          type: string
+          description: An image icon that is shown next to statuses and in the profile.
+          format: uri
+        avatar_static:
+          type: string
+          description: A static version of the avatar. Equal to `avatar` if its value is a static image; different if `avatar` is an animated GIF.
+          format: uri
+        header:
+          type: string
+          description: An image banner that is shown above the profile and in profile cards.
+          format: uri
+        header_static:
+          type: string
+          description: A static version of the header. Equal to `header` if its value is a static image; different if `header` is an animated GIF.
+          format: uri
+        locked:
+          type: boolean
+          description: Whether the account manually approves follow requests.
+        emojis:
+          type: array
+          description: 'Custom emoji entities to be used when rendering the profile. If none, an empty array will be returned.'
+          items:
+            $ref: '#/components/schemas/Emoji'
+        discoverable:
+          type: string
+          description: Whether the account has opted into discovery features such as the profile directory.
+      required:
+        - id
+        - username
+        - acct
+        - url
+        - created_at
+        - statuses_count
+        - followers_count
+        - following_count
+        - display_name
+        - note
+        - avatar
+        - avatar_static
+        - header
+        - header_static
+        - locked
+        - emojis
+        - discoverable
+      x-tags:
+        - Accounts
+    Application:
+      title: Application
+      x-stoplight:
+        id: s0e4fxq0juzns
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of your application.
+        website:
+          type: string
+          nullable: true
+          description: The website associated with your application.
+          format: uri
+        vapid_key:
+          type: string
+          description: ' Used for Push Streaming API. Returned with POST /api/v1/apps. Equivalent to PushSubscription#server_key.'
+      required:
+        - name
+      description: Represents an application that interfaces with the REST API to access accounts or post statuses.
+      x-tags:
+        - Applications
+    Attachment:
+      title: Attachment
+      x-stoplight:
+        id: kyesjtrexbuw4
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the attachment in the database. Cast from integer but not guaranteed to be a number.
+        url:
+          type: string
+          format: uri
+          description: The location of the original full-size attachment.
+        preview_url:
+          type: string
+          format: uri
+          description: The location of a scaled-down preview of the attachment.
+        remote_url:
+          type: string
+          format: uri
+          description: The location of the full-size original attachment on the remote website. Null if the attachment is local.
+        description:
+          type: string
+          description: 'Alternate text that describes what is in the media attachment, to be used for the visually impaired or when media attachments do not load.'
+        blurhash:
+          type: string
+          description: 'A hash computed by the BlurHash algorithm, for generating colorful preview thumbnails when media has not been downloaded yet.'
+      required:
+        - id
+        - url
+        - preview_url
+    Card:
+      title: Card
+      x-stoplight:
+        id: 3rnsdy0r7wiyc
+      description: Represents a rich preview card that is generated using OpenGraph tags from a URL.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Location of linked resource.
+        title:
+          type: string
+          description: Title of linked resource.
+        description:
+          type: string
+          description: Description of preview.
+        type:
+          type: string
+          enum:
+            - link
+            - photo
+            - video
+            - rich
+          description: |-
+            The type of preview card.
+            - `link` = Link OEmbed
+            - `photo` = Photo OEmbed
+            - `video` = Video OEmbed
+            - `rich` = iFrame OEmbed. Not currently accepted, so won't show up in practice.
+        author_name:
+          type: string
+          description: The author of the original resource.
+        author_url:
+          type: string
+          format: uri
+          description: A link to the author of the original resource.
+        provider_name:
+          type: string
+          description: The provider of the original resource.
+        provider_url:
+          type: string
+          format: uri
+          description: A link to the provider of the original resource.
+        html:
+          type: string
+          description: HTML to be used for generating the preview card.
+        width:
+          type: integer
+          description: 'Width of preview, in pixels.'
+        height:
+          type: integer
+          description: 'Height of preview, in pixels.'
+        image:
+          type: string
+          format: uri
+          description: Preview thumbnail.
+        embed_url:
+          type: string
+          format: uri
+          description: 'Used for photo embeds, instead of custom `html`.'
+        blurhash:
+          type: string
+          description: 'A hash compute by the BlurHash algorithm, for generating colorful preview thumbnails when media has not been downloaded yet.'
+      required:
+        - url
+        - title
+        - description
+        - type
+      examples:
+        - url: 'https://www.youtube.com/watch?v=OMv_EPMED8Y'
+          title: ♪ Brand New Friend (Christmas Song!)
+          description: ''
+          type: video
+          author_name: YOGSCAST Lewis & Simon
+          author_url: 'https://www.youtube.com/user/BlueXephos'
+          provider_name: YouTube
+          provider_url: 'https://www.youtube.com/'
+          html: '<iframe width="480" height="270" src="https://www.youtube.com/embed/OMv_EPMED8Y?feature=oembed" frameborder="0" allowfullscreen=""></iframe>'
+          width: 480
+          height: 270
+          image: 'https://files.mastodon.social/preview_cards/images/014/179/145/original/9cf4b7cf5567b569.jpeg'
+          embed_url: ''
+          blurhash: 'UvK0HNkV,:s9xBR%njog0fo2W=WBS5ozofV@'
+        - url: 'https://www.flickr.com/photos/tomfenskephotography/49088768431/'
+          title: Oregon
+          description: ''
+          type: photo
+          author_name: Tom Fenske Photography
+          author_url: 'https://www.flickr.com/photos/tomfenskephotography/'
+          provider_name: Flickr
+          provider_url: 'https://www.flickr.com/'
+          html: ''
+          width: 1024
+          height: 427
+          image: 'https://files.mastodon.social/preview_cards/images/014/287/139/original/651b1c6976817824.jpeg'
+          embed_url: 'https://live.staticflickr.com/65535/49088768431_6a4322b3bb_b.jpg'
+          blurhash: 'UnE{@jt6M_oIAhjYs+ayT2WBf9ayRkkDXAj['
+        - url: 'https://www.theguardian.com/money/2019/dec/07/i-lost-my-193000-inheritance-with-one-wrong-digit-on-my-sort-code'
+          title: '‘I lost my £193,000 inheritance – with one wrong digit on my sort code’'
+          description: 'When Peter Teich’s money went to another Barclays customer, the bank offered £25 as a token gesture'
+          type: link
+          author_name: ''
+          author_url: ''
+          provider_name: ''
+          provider_url: ''
+          html: ''
+          width: 0
+          height: 0
+          image: null
+          embed_url: ''
+          blurhash: null
     Client-Credentials:
       title: Client-Credentials
       x-stoplight:
@@ -364,23 +1646,609 @@ components:
       examples:
         - client_id: TWhM-tNSuncnqN7DBJmoyeLnk6K3iJJ71KKXxgL1hPM
           client_secret: ZEaFUFmF0umgBX1qKJDjaU99Q31lDkOU8NutzTOoliw
+      x-tags:
+        - Applications
+    Emoji:
+      title: Emoji
+      x-stoplight:
+        id: x8px3r5ceivxr
+      type: object
+      properties:
+        shortcode:
+          type: string
+          description: The name of the custom emoji.
+        url:
+          type: string
+          format: uri
+          description: A link to the custom emoji.
+        static_url:
+          type: string
+          format: uri
+          description: A link to a static copy of the custom emoji.
+        visible_in_picker:
+          type: boolean
+          description: Whether this Emoji should be visible in the picker or unlisted.
+        category:
+          type: string
+          description: Used for sorting custom emoji in the picker.
+      required:
+        - shortcode
+        - url
+        - static_url
+        - visible_in_picker
+      description: Represents a custom emoji.
+      examples:
+        - shortcode: blobaww
+          url: 'https://files.mastodon.social/custom_emojis/images/000/011/739/original/blobaww.png'
+          static_url: 'https://files.mastodon.social/custom_emojis/images/000/011/739/static/blobaww.png'
+          visible_in_picker: true
+          category: Blobs
+      x-tags:
+        - Emojis
+    Featured-Tag:
+      title: Featured-Tag
+      x-stoplight:
+        id: 28qu5cwm6edgw
+      type: object
+      description: Represents a hashtag that is featured on a profile.
+      properties:
+        id:
+          type: string
+          description: The internal ID of the featured tag in the database. Cast from integer but not guaranteed to be a number.
+        name:
+          type: string
+          description: The name of the hashtag being featured.
+        url:
+          type: string
+          description: A link to all statuses by a user that contain this hashtag.
+          format: uri
+        statuses_count:
+          type: integer
+          description: The number of authored statuses containing this hashtag.
+        last_status_at:
+          type: string
+          description: The timestamp of the last authored status containing this hashtag.ISO 8601 Datetime.
+          format: date-time
+      required:
+        - id
+        - name
+        - url
+        - statuses_count
+        - last_status_at
+    Field:
+      title: Field
+      x-stoplight:
+        id: z0seiqzqx3san
+      type: object
+      description: Represents a profile field as name-value pair with optional verification.
+      properties:
+        name:
+          type: string
+          description: The key of a given field's key-value pair.
+        value:
+          type: string
+          description: The value associated with the `name` key (HTML).
+        verified_at:
+          type: string
+          format: date-time
+          description: 'Timestamp of when the server verified a URL value for a rel="me" link (ISO 8601 Datetime). Only defined if `value` is a verified URL. Otherwise, null.'
+      required:
+        - name
+        - value
+      examples:
+        - name: Website
+          value: 'https://trwnh.com'
+          verified_at: '2019-08-29T04:14:55.571+00:00'
+        - name: Sponsor
+          value: 'https://liberapay.com/at'
+          verified_at: '2019-11-15T10:06:15.557+00:00'
+        - name: 'Fan of:'
+          value: 'Punk-rock and post-hardcore (Circa Survive, letlive., La Dispute, THE FEVER 333)Manga (Yu-Gi-Oh!, One Piece, JoJo''s Bizarre Adventure, Death Note, Shaman King)Platformers and RPGs (Banjo-Kazooie, Boktai, Final Fantasy Crystal Chronicles)'
+          verified_at: null
+        - name: 'Main topics:'
+          value: 'systemic analysis, design patterns, anticapitalism, info/tech freedom, theory and philosophy, and otherwise being a genuine and decent wholesome poster. i''m just here to hang out and talk to cool people!'
+          verified_at: null
+      x-tags:
+        - Accounts
+    History:
+      title: History
+      x-stoplight:
+        id: gnd8vp9n6jpa3
+      x-tags:
+        - Tags
+      type: object
+      description: Represents daily usage history of a hashtag.
+      properties:
+        day:
+          type: string
+          description: UNIX timestamp on midnight of the given day.
+        uses:
+          type: string
+          description: The counted usage of the tag within that day. Cast from integer.
+        accounts:
+          type: string
+          description: The total of accounts using the tag within that day. Cast from integer.
+      required:
+        - day
+        - uses
+        - accounts
+      examples:
+        - day: string
+          uses: string
+          accounts: string
+    Identity-Proof:
+      title: Identity-Proof
+      x-stoplight:
+        id: nbj1lnwz95tt3
+      type: object
+      properties:
+        provider:
+          type: string
+          description: The name of the identity provider.
+        provider_username:
+          type: string
+          description: The account owner's username on the identity provider's service.
+        profile_url:
+          type: string
+          format: uri
+          description: The account owner's profile URL on the identity provider.
+        proof_url:
+          type: string
+          format: uri
+          description: 'A link to a statement of identity proof, hosted by the identity provider.'
+        updated_at:
+          type: string
+          description: When the identity proof was last updated. ISO 8601 DateTime.
+          format: date-time
+      required:
+        - provider
+        - provider_username
+        - profile_url
+        - proof_url
+        - updated_at
+      description: Represents a proof from an external identity provider.
+    List:
+      title: List
+      x-stoplight:
+        id: iz3xezwcfiyi5
+      type: object
+      description: Represents a list of some users that the authenticated user follows.
+      properties:
+        id:
+          type: string
+          description: 'The internal database ID of the list. Cast from an integer, but not guaranteed to be a number.'
+        title:
+          type: string
+          description: The user-defined title of the list.
+        replies_policy:
+          type: string
+          enum:
+            - followed
+            - list
+            - none
+          description: |-
+            The user-defined title of the list.
+
+            - `followed` = Show replies to any followed user.
+            - `list` = Show replies to members of the list.
+            - `none` = Show replies to no one.
+      required:
+        - id
+        - title
+    Mention:
+      title: Mention
+      x-stoplight:
+        id: ephprj9etl86y
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'The account id of the mentioned user. Cast from an integer, but not guaranteed to be a number.'
+        username:
+          type: string
+          description: The username of the mentioned user.
+        acct:
+          type: string
+          description: 'The webfinger acct: URI of the mentioned user. Equivalent to `username` for local users, or `username@domain` for remote users.'
+        url:
+          type: string
+          description: The location of the mentioned user's profile.
+          format: uri
+      required:
+        - id
+        - username
+        - acct
+        - url
+      description: Represents a mention of a user within the content of a status.
+      examples:
+        - id: '952529'
+          username: alayna
+          url: 'https://desvox.es/users/alayna'
+          acct: alayna@desvox.es
+        - id: '14715'
+          username: trwnh
+          url: 'https://mastodon.social/@trwnh'
+          acct: trwnh
+    Poll:
+      title: Poll
+      x-stoplight:
+        id: eck898dvd4y4a
+      description: Represents a poll attached to a status.
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the poll in the database. Cast from an integer but not guaranteed to be a number.
+        expires_at:
+          type: string
+          description: When the poll ends. ISO8601 DateTime or null if the poll does not end.
+        expired:
+          type: boolean
+          description: Is the poll currently expired?
+        multiple:
+          type: boolean
+          description: Does the poll allow multiple-choice answers?
+        votes_count:
+          type: integer
+          description: How many votes have been recieved.
+        voters_count:
+          type: integer
+          description: How many unique accounts have voted on a multiple choice poll. Null if `multiple` is false.
+        voted:
+          type: boolean
+          description: 'When called with a user token, has the authorized user voted?'
+        own_votes:
+          type: array
+          description: 'When called with a user token, which options has the authorized user chosen? Contains an array of index values for `options`.'
+          items:
+            type: integer
+        options:
+          type: array
+          description: Possible answers for the poll.
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: The text value of the poll option.
+              votes_count:
+                type: integer
+                description: 'The number of votes received for this option. Number, or null if results are not published yet.'
+                minimum: 0
+            required:
+              - title
+        emojis:
+          type: array
+          description: Custom emoji to be used for rendering poll options.
+          items:
+            $ref: '#/components/schemas/Emoji'
+      required:
+        - id
+        - expired
+        - multiple
+        - votes_count
+        - options
+        - emojis
+    Relationship:
+      title: Relationship
+      x-stoplight:
+        id: m55gcfa8jpe5r
+      description: 'Represents the relationship between accounts, such as following / blocking / muting / etc.'
+      properties:
+        id:
+          type: string
+          description: 'The account id. Cast from an integer, but not guaranteed to be a number.'
+        following:
+          type: boolean
+          description: Are you following this user?
+        requested:
+          type: boolean
+          description: Do you have a pending follow request for this user?
+        followed_by:
+          type: boolean
+          description: Are you followed by this user?
+        muting:
+          type: boolean
+          description: Are you muting this user?
+        muting_notifications:
+          type: boolean
+          description: Are you muting notifications from this user?
+        showing_reblogs:
+          type: boolean
+          description: Are you receiving this user's boosts in your home timeline?
+        notifying:
+          type: boolean
+          description: Have you enabled notifications for this user?
+        blocking:
+          type: boolean
+          description: Are you blocking this user?
+        domain_blocking:
+          type: boolean
+          description: Are you blocking this user's domain?
+        blocked_by:
+          type: boolean
+          description: Is this user blocking you?
+        note:
+          type: string
+          description: This user's profile bio
+      required:
+        - id
+        - following
+        - requested
+        - followed_by
+        - muting
+        - muting_notifications
+        - showing_reblogs
+        - notifying
+        - blocking
+        - domain_blocking
+        - blocked_by
+    Source:
+      title: Source
+      x-stoplight:
+        id: jmpm6jpiz2lfq
+      type: object
+      description: 'Represents display or publishing preferences of user''s own account. Returned as an additional entity when verifying and updated credentials, as an attribute of `Account`.'
+      properties:
+        note:
+          type: string
+          description: Profile bio.
+        fields:
+          type: array
+          description: Metadata about the account.
+          items:
+            $ref: '#/components/schemas/Field'
+        privacy:
+          type: string
+          description: 'The default post privacy to be used for new statuses. `public` = Public post, `unlisted` = unlisted post, `private` = followers-only post, and `direct` = direct post.'
+          enum:
+            - public
+            - unlisted
+            - private
+            - direct
+        sensitive:
+          type: boolean
+          description: Whether new statuses should be marked sensitive by default.
+        language:
+          type: string
+          description: The default posting langauge for new statuses (ISO 639-1 language two-letter code).
+        follower_requests_count:
+          type: number
+          description: The number of pending follow requests.
+      required:
+        - note
+        - fields
+      x-tags:
+        - Accounts
+    Status:
+      title: Status
+      x-stoplight:
+        id: 7bz8wiw45jg0v
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the status in the database. Cast from integer but not guaranteed to be a number.
+        uri:
+          type: string
+          format: uri
+          description: URI of the status used for federation.
+        created_at:
+          type: string
+          description: The date when this status was created (ISO 8601 DateTime).
+          format: date-time
+        account:
+          $ref: '#/components/schemas/Account'
+        content:
+          type: string
+          description: HTML-encoded status content.
+        visibility:
+          type: string
+          description: |-
+            Visibility of this status.
+            - `public` = Visible to everyone, shown in public timelines.
+            - `unlisted` = Visible to public, but not included in public timelines.
+            - `private` = Visible to followers only, and to any mentioned users.
+            - `direct` = Visible only to mentioned users.
+          enum:
+            - public
+            - unlisted
+            - private
+            - direct
+        sensitive:
+          type: boolean
+          description: Is the status marked as sensitive content?
+        spoiler_text:
+          type: string
+          description: 'Subject or summary line, below which status content is collapsed until expanded.'
+        media_attachements:
+          type: array
+          description: Media that is attached to this status.
+          items:
+            $ref: '#/components/schemas/Attachment'
+        application:
+          $ref: '#/components/schemas/Application'
+        url:
+          type: string
+          format: uri
+          description: A link to the status's HTML representation.
+        in_reply_to_id:
+          type: string
+          description: ID of the status being replied. Cast from an integer but not guaranteed to be a number.
+        in_reply_to_account_id:
+          type: string
+          description: ID of the account being replied to. Cast from integer but not guaranteed to be a number.
+        reblog:
+          $ref: '#/components/schemas/Status'
+        poll:
+          $ref: '#/components/schemas/Poll'
+        card:
+          $ref: '#/components/schemas/Card'
+        language:
+          type: string
+          description: Primary langauge of this status. ISO 639 Part 1 two-letter langauge code.
+        text:
+          type: string
+          description: 'Plain-text source of a status. Returned instead of `content` when status is deleted, so the user may redraft from the source text without the client having to reverse-engineer the original text from the HTML content.'
+        mentions:
+          type: array
+          description: Mentions of users within the status content.
+          items:
+            $ref: '#/components/schemas/Mention'
+        tags:
+          type: array
+          description: Hashtags used within the status content.
+          items:
+            $ref: '#/components/schemas/Tag'
+        emojis:
+          type: array
+          description: Custom emoji to be used while rendering status content.
+          items:
+            $ref: '#/components/schemas/Emoji'
+        reblogs_count:
+          type: integer
+          minimum: 0
+          description: How many boosts this status has received.
+        favourites_count:
+          type: integer
+          minimum: 0
+          description: How many favourites this status has received.
+        replies_count:
+          type: integer
+          minimum: 0
+          description: How many replies this status has received.
+        favourited:
+          type: boolean
+          description: Have you favourited this status?
+        reblogged:
+          type: boolean
+          description: Have you boosted this status?
+        muted:
+          type: string
+          description: Have you muted notifications for this status's conversation?
+        bookmarked:
+          type: string
+          description: Have you bookmarked this status?
+        pinned:
+          type: string
+          description: Have you pinned this status? Only appears if the status is pinnable.
+      required:
+        - id
+        - uri
+        - created_at
+        - account
+        - content
+        - visibility
+        - sensitive
+        - spoiler_text
+        - media_attachements
+        - application
+        - mentions
+        - tags
+        - emojis
+        - reblogs_count
+        - favourites_count
+        - replies_count
+    Tag:
+      title: Tag
+      x-stoplight:
+        id: vrpd11pw1tt8t
+      type: object
+      examples:
+        - name: nowplaying
+          url: 'https://mastodon.social/tags/nowplaying'
+          history:
+            - day: '1574553600'
+              uses: '200'
+              accounts: '31'
+            - day: '1574467200'
+              uses: '272'
+              accounts: '39'
+            - day: '1574380800'
+              uses: '345'
+              accounts: '40'
+            - day: '1574294400'
+              uses: '366'
+              accounts: '46'
+            - day: '1574208000'
+              uses: '226'
+              accounts: '32'
+            - day: '1574121600'
+              uses: '217'
+              accounts: '42'
+            - day: '1574035200'
+              uses: '214'
+              accounts: '34'
+      description: Represents a hashtag used within the content of a status.
+      x-tags:
+        - Tags
+      properties:
+        name:
+          type: string
+          description: 'The value of the hashtag after the # sign.'
+        url:
+          type: string
+          format: uri
+          description: A link to the hashtag on the instance.
+        history:
+          type: array
+          description: Usage statistics for given days.
+          items:
+            $ref: '#/components/schemas/History'
+      required:
+        - name
+        - url
   requestBodies: {}
   securitySchemes:
+    user-token-auth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /oauth/authorize
+          tokenUrl: /oauth/token
+          scopes:
+            read: Grants access to read data. Requesting `read` will also grant child scopes shown in the left column of the table below.
+            write: Grants access to write data. Requesting `write` will also grant child scopes shown in the right column of the table below.
+            follow: 'Grants access to manage relationships. Requesting `follow` will also grant the following child scopes, shown in bold in the table: `read:blocks`, `write:blocks`, `read:follows`, `write:follows`, `read:mutes`, and `write:mutes`.'
+            push: Grants access to Web Push API subscriptions. Added in Mastodon 2.4.0.
+            'admin:read': 'Includes `admin:read:accounts` and `admin:read:reports` scopes.'
+            'admin:read:accounts': ''
+            'admin:read:reports': ''
+            'admin:write': 'Includes `admin:write:accounts` and `admin:write:reports`'
+            'admin:write:accounts': ''
+            'admin:write:reports': ''
+            'read:accounts': ''
+            'write:accounts': ''
+            'read:bookmarks': ''
+            'write:bookmarks': ''
+            'write:conversations': ''
+            'read:favourites': ''
+            'write:favourites': ''
+            'read:filters': ''
+            'write:filters': ''
+            'read:follows': ''
+            'write:follows': ''
+            'read:lists': ''
+            'write:lists': ''
+            'write:media': ''
+            'read:mutes': ''
+            'write:mutes': ''
+            'read:notifications': ''
+            'write:notifications': ''
+            'write:reports': ''
+            'read:search': ''
+            'read:statuses': ''
+            'write:statuses': ''
+      description: ''
     client-auth:
       type: oauth2
       flows:
         clientCredentials:
           tokenUrl: ''
           refreshUrl: ''
-          scopes: {}
-    user-auth:
-      type: oauth2
-      flows:
-        authorizationCode:
-          authorizationUrl: ''
-          tokenUrl: ''
-          refreshUrl: ''
-          scopes: {}
+          scopes:
+            'write:accounts': ''
+            'read:accounts': ''
   responses:
     Invalid-Authentication-Token:
       description: 'If the Authorization header contains an invalid token, is malformed, or is not present, an error will be returned indicating an authorization failure.'
@@ -398,6 +2266,11 @@ components:
               value:
                 error: The access token is invalid
 tags:
+  - name: Accounts
   - name: Applications
+  - name: Identity Proofs
+  - name: Lists
   - name: OAuth
+  - name: Statuses
+  - name: Tags
 security: []
