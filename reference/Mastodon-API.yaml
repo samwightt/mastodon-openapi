@@ -242,6 +242,62 @@ paths:
         description: ''
       tags:
         - OAuth
+  /oauth/revoke:
+    post:
+      summary: Revoke token
+      tags:
+        - OAuth
+      responses:
+        '200':
+          description: 'If you own the provided token, the API call will provide an empty response. This operation is idempotent, so calling this API multiple times will still return OK.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '403':
+          description: 'If you provide a token you don''t own, or no token at all, the API call will return a 403 error.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_description:
+                    type: string
+                required:
+                  - error
+                  - error_description
+              examples:
+                Example 1:
+                  value:
+                    error: unauthorized_client
+                    error_description: You are not authorized to revoke this token
+      operationId: post-oauth-revoke
+      description: Revoke an access token to make it no longer valid for use.
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                  description: 'Client ID, obtained during app registration.'
+                client_secret:
+                  type: string
+                  description: 'Client secret, obtained during app registration.'
+                token:
+                  type: string
+                  description: 'The previously obtained token, to be invalidated.'
+              required:
+                - client_id
+                - client_secret
+                - token
+      security:
+        - client-auth: []
+        - user-auth: []
 components:
   schemas:
     Application:
@@ -317,9 +373,14 @@ components:
           tokenUrl: ''
           refreshUrl: ''
           scopes: {}
-    app-token:
-      type: http
-      scheme: bearer
+    user-auth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: ''
+          tokenUrl: ''
+          refreshUrl: ''
+          scopes: {}
   responses:
     Invalid-Authentication-Token:
       description: 'If the Authorization header contains an invalid token, is malformed, or is not present, an error will be returned indicating an authorization failure.'
