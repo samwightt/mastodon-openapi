@@ -1463,6 +1463,30 @@ components:
         - discoverable
       x-tags:
         - Accounts
+    Activity:
+      title: Activity
+      x-stoplight:
+        id: laoulmz8wkrfh
+      type: object
+      description: Represents a weekly bucket of instance activity.
+      properties:
+        week:
+          type: string
+          description: Midnight at the first day of the week. UNIX timestamp.
+        statuses:
+          description: Statuses created since the week began. String cast from an integer.
+          type: string
+        logins:
+          type: string
+          description: User logins since the week began. String cast from an integer.
+        registrations:
+          type: string
+          description: User registrations since the week began. String cast from an integer.
+      required:
+        - week
+        - statuses
+        - logins
+        - registrations
     Application:
       title: Application
       x-stoplight:
@@ -2198,6 +2222,769 @@ components:
       required:
         - name
         - url
+    Admin-Account:
+      title: 'Admin::Account'
+      x-stoplight:
+        id: xyakm7mxo0kti
+      type: object
+      description: Admin-level information about a given account.
+      properties:
+        id:
+          type: string
+          description: 'The ID of the account in the database. Cast from an integer, but not guaranteed to be a number.'
+        username:
+          type: string
+          description: The username of the account.
+        domain:
+          type: string
+          description: The domain of the account.
+        created_at:
+          type: string
+          format: date-time
+          description: When the account was first discovered
+        email:
+          type: string
+          description: The email address associated with the account.
+          format: email
+        ip:
+          type: string
+          description: The IP address last used to login to this account.
+        locale:
+          type: string
+          description: The locale of the account. ISO 639 Part 1 two-letter language code.
+        invite_request:
+          type: string
+          description: Invite request text ???
+        role:
+          type: string
+          description: The current role of the account.
+        confirmed:
+          type: boolean
+          description: Whether the account has confirmed their email address.
+        approved:
+          type: boolean
+          description: Whether the account is currently approved.
+        disabled:
+          type: boolean
+          description: Whether the account is currently disabled.
+        silenced:
+          type: boolean
+          description: Whether the account is currently silenced.
+        suspended:
+          type: boolean
+          description: Whether the account is currently suspended.
+        account:
+          $ref: '#/components/schemas/Account'
+        created_by_application_id:
+          type: string
+          description: 'The ID of the application that created this account. Cast from an integer, but not guaranteed to be a number.'
+        invited_by_account_id:
+          type: string
+          description: 'The ID of the account that invited this user. Cast from an integer, but not guaranteed to be a number.'
+      required:
+        - id
+        - username
+        - domain
+        - created_at
+        - email
+        - ip
+        - locale
+        - invite_request
+        - role
+        - confirmed
+        - approved
+        - disabled
+        - silenced
+        - suspended
+        - account
+    Admin-Report:
+      title: 'Admin::Report'
+      x-stoplight:
+        id: s42ye786vcvq0
+      type: object
+      description: Admin-level information about a filed report.
+      properties:
+        id:
+          type: string
+          description: The ID of the report in the database.
+        action_taken:
+          type: string
+          description: The action taken to resolve this report.
+        comment:
+          type: string
+          description: An optional reason for reporting.
+        created_at:
+          type: string
+          format: date-time
+          description: The time the report was filed.
+        updated_at:
+          type: string
+          description: The time of last action on this report.
+          format: date-time
+        account:
+          $ref: '#/components/schemas/Account'
+        target_account:
+          $ref: '#/components/schemas/Account'
+        assigned_account:
+          $ref: '#/components/schemas/Account'
+        action_taken_by_account:
+          type: string
+          description: The action taken by the moderator who handled the report.
+        statuses:
+          type:
+            - string
+            - array
+          description: 'Statuses attached to the report, for context.'
+          items:
+            $ref: '#/components/schemas/Status'
+      required:
+        - id
+        - created_at
+        - updated_at
+        - account
+        - target_account
+        - assigned_account
+        - action_taken_by_account
+        - statuses
+    Announcement:
+      title: Announcement
+      x-stoplight:
+        id: tq7a9r3zs770w
+      type: object
+      description: Represents an announcement set by an administrator.
+      properties:
+        id:
+          type: string
+          description: The announcement id.
+        text:
+          type: string
+          description: The content of the announcement.
+        published:
+          type: boolean
+          description: Whether the announcement is currently active.
+        all_day:
+          type: boolean
+          description: Whether the announcement has a start/end time.
+        created_at:
+          type: string
+          description: When the announcement was created.
+          format: date-time
+        updated_at:
+          type: string
+          description: When the announcement was updated.
+          format: date-time
+        read:
+          description: Whether the announcement has been read by the user.
+          type: boolean
+        reactions:
+          type: array
+          description: Emoji reactions attached to the announcement.
+          items:
+            $ref: '#/components/schemas/Announcement-Reaction'
+        scheduled_at:
+          type: string
+          format: date-time
+          description: When the future annouoncement was scheduled.
+        starts_at:
+          type: string
+          format: date-time
+          description: When the future announcement will start.
+        ends_at:
+          type: string
+          format: date-time
+          description: When the future announcement will end.
+      required:
+        - id
+        - text
+        - published
+        - all_day
+        - created_at
+        - updated_at
+        - read
+        - reactions
+      examples:
+        - id: '8'
+          content: '<p>Looks like there was an issue processing audio attachments without embedded art since yesterday due to an experimental new feature. That issue has now been fixed, so you may see older posts with audio from other servers pop up in your feeds now as they are being finally properly processed. Sorry!</p>'
+          starts_at: null
+          ends_at: null
+          all_day: false
+          published_at: '2020-07-03T01:27:38.726Z'
+          updated_at: '2020-07-03T01:27:38.752Z'
+          read: true
+          mentions: []
+          statuses: []
+          tags: []
+          emojis: []
+          reactions:
+            - name: bongoCat
+              count: 9
+              me: false
+              url: 'https://files.mastodon.social/custom_emojis/images/000/067/715/original/fdba57dff7576d53.png'
+              static_url: 'https://files.mastodon.social/custom_emojis/images/000/067/715/static/fdba57dff7576d53.png'
+            - name: thonking
+              count: 1
+              me: false
+              url: 'https://files.mastodon.social/custom_emojis/images/000/098/690/original/a8d36edc4a7032e8.png'
+              static_url: 'https://files.mastodon.social/custom_emojis/images/000/098/690/static/a8d36edc4a7032e8.png'
+            - name: AAAAAA
+              count: 1
+              me: false
+              url: 'https://files.mastodon.social/custom_emojis/images/000/071/387/original/AAAAAA.png'
+              static_url: 'https://files.mastodon.social/custom_emojis/images/000/071/387/static/AAAAAA.png'
+            - name: "\U0001F914"
+              count: 1
+              me: true
+    Announcement-Reaction:
+      title: Announcement-Reaction
+      x-stoplight:
+        id: 6kf3k3lzqaqdt
+      type: object
+      properties:
+        name:
+          type: string
+          description: 'The emoji used for the reaction. Either a unicode emoji, or a custom emoji''s shortcode.'
+        count:
+          type: integer
+          description: The total number of users who have added this reaction.
+        me:
+          type: boolean
+          description: Whether the authorized user has added this reaction to the announcement.
+        url:
+          type: string
+          description: A link to the custom emoji.
+        static_url:
+          type: string
+          description: A link to a non-animated version of the custom emoji.
+      required:
+        - name
+        - count
+        - me
+    Context:
+      title: Context
+      x-stoplight:
+        id: ok2jn797msj53
+      type: object
+      description: Represents the tree around a given status. Used for reconstructing threads of statuses.
+      properties:
+        ancestors:
+          type: array
+          description: Parents in the thread.
+          items:
+            $ref: '#/components/schemas/Status'
+        descendants:
+          type: array
+          description: Children in the thread.
+          items:
+            $ref: '#/components/schemas/Status'
+      required:
+        - ancestors
+        - descendants
+    Conversation:
+      title: Conversation
+      x-stoplight:
+        id: k5x3so2ok8b48
+      type: object
+      description: Represents a conversation with "direct message" visibility.
+      properties:
+        id:
+          type: string
+          description: Local database ID of the conversation.
+        accounts:
+          type: array
+          description: Participants in the conversation.
+          items:
+            $ref: '#/components/schemas/Account'
+        unread:
+          type: boolean
+          description: Is the conversation currently marked as unread?
+        last_status:
+          $ref: '#/components/schemas/Status'
+      required:
+        - id
+        - accounts
+        - unread
+    Filter:
+      title: Filter
+      x-stoplight:
+        id: gkc9qhjrql1nl
+      type: object
+      description: |-
+        Represents a user-defined filter for determining which statuses should not be shown to the user.
+
+        ## Implementation notes
+        If `whole_word` is true, cient app should:
+
+        - Define 'word constituent character' for your app. In the official implementation, it's `[A-Za-z0-9_]` in JavaScript, and `[[:word]]` in Ruby. Ruby uses POSIX character class (Letter | Mark | Decimal_Number | Connector_Punctuation).
+        - If the phrase starts with a word character, and if the previous character before matched range is a word character, its matched range should be treated to not match.
+        - If the phrase ends with a word character, and if the next character after matched range is a word character, its matched range should be treated to not match.
+
+        Please check `app/javascript/mastodon/selectors/index.js` and `app/lib/feed_manager.rb` in the Mastodon source code for more details.
+      properties:
+        id:
+          type: string
+          description: The ID of the filter in the database.
+        phrase:
+          type: string
+          description: The text to be filtered.
+        context:
+          type: array
+          description: |-
+            The contexts in which the filter should be applied.
+
+            - `home` = home timeline and lists.
+            - `notifications` = notifications timeline
+            - `public` = public timelines
+            - `thread` = expanded thread of a detailed status.
+          items:
+            type: string
+            enum:
+              - home
+              - notifications
+              - public
+              - thread
+        expires_at:
+          type: string
+          description: When the filter should no longer be applied
+          format: date-time
+        irreversible:
+          type: boolean
+          description: Should matching entities in home and notifications be dropped by the server?
+        whole_word:
+          type: boolean
+          description: Should the filter consider word boundaries?
+      required:
+        - id
+        - phrase
+        - context
+        - expires_at
+        - irreversible
+        - whole_word
+    Instance:
+      type: object
+      x-examples:
+        example-1:
+          uri: mastodon.social
+          title: Mastodon
+          short_description: "Server run by the main developers of the project <img draggable=\"false\" alt=\"\U0001F418\" class=\"emojione\" src=\"https://mastodon.social/emoji/1f418.svg\" /> It is not focused on any particular niche interest - everyone is welcome as long as you follow our code of conduct!"
+          description: "Server run by the main developers of the project <img draggable=\"false\" alt=\"\U0001F418\" class=\"emojione\" src=\"https://mastodon.social/emoji/1f418.svg\" /> It is not focused on any particular niche interest - everyone is welcome as long as you follow our code of conduct!"
+          email: staff@mastodon.social
+          version: 3.0.1
+          urls:
+            streaming_api: 'wss://mastodon.social'
+          stats:
+            user_count: 415526
+            status_count: 17085754
+            domain_count: 11834
+          thumbnail: 'https://files.mastodon.social/site_uploads/files/000/000/001/original/vlcsnap-2018-08-27-16h43m11s127.png'
+          languages:
+            - en
+          registrations: true
+          approval_required: false
+          contact_account:
+            id: '1'
+            username: Gargron
+            acct: Gargron
+            display_name: Eugen
+            locked: false
+            bot: false
+            created_at: '2016-03-16T14:34:26.392Z'
+            note: '<p>Developer of Mastodon and administrator of mastodon.social. I post service announcements, development updates, and personal stuff.</p>'
+            url: 'https://mastodon.social/@Gargron'
+            avatar: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+            avatar_static: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+            header: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+            header_static: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+            followers_count: 317112
+            following_count: 453
+            statuses_count: 60903
+            last_status_at: '2019-11-26T21:14:44.522Z'
+            emojis: []
+            fields:
+              - name: Patreon
+                value: '<a href="https://www.patreon.com/mastodon" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://www.</span><span class="">patreon.com/mastodon</span><span class="invisible"></span}'
+                verified_at: null
+              - name: Homepage
+                value: '<a href="https://zeonfederated.com" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">zeonfederated.com</span><span class="invisible"></span}'
+                verified_at: '2019-07-15T18:29:57.191+00:00'
+      properties:
+        uri:
+          type: string
+          format: uri
+          description: The domain name of the instance.
+        title:
+          type: string
+          description: The title of the website.
+        short_description:
+          type: string
+          description: A shorter description defined by the admin.
+        description:
+          type: string
+          description: Admin-defined description of the Mastodon site.
+        email:
+          type: string
+          description: An email that may be contacted for any inquiries.
+          format: email
+        version:
+          type: string
+          description: The version of Mastodon installed on the instance.
+        urls:
+          type: object
+          description: URLs of interest for client apps.
+          required:
+            - streaming_api
+          properties:
+            streaming_api:
+              type: string
+              description: Websockets address for push streaming.
+              format: uri
+        stats:
+          type: object
+          required:
+            - user_count
+            - status_count
+            - domain_count
+          properties:
+            user_count:
+              type: integer
+              description: Users registered on this instance.
+            status_count:
+              type: integer
+              description: Statuses authored by users on instance.
+            domain_count:
+              type: integer
+              description: Domains federated with this instance.
+        languages:
+          type: array
+          description: Primary languages of the website and its staff.
+          items:
+            type: string
+        registrations:
+          type: boolean
+          description: Whether registrations are enabled.
+        approval_required:
+          type: boolean
+          description: Whether registrations require moderator approval.
+        contact_account:
+          $ref: '#/components/schemas/Account'
+        thumbnail:
+          type:
+            - string
+            - 'null'
+          description: Banner image for the website.
+          format: uri
+      required:
+        - uri
+        - title
+        - short_description
+        - description
+        - email
+        - version
+        - urls
+        - stats
+        - languages
+        - registrations
+        - approval_required
+      description: Represents the software instance of Mastodon running on this domain.
+      examples:
+        - uri: mastodon.social
+          title: Mastodon
+          short_description: "Server run by the main developers of the project <img draggable=\"false\" alt=\"\U0001F418\" class=\"emojione\" src=\"https://mastodon.social/emoji/1f418.svg\" /> It is not focused on any particular niche interest - everyone is welcome as long as you follow our code of conduct!"
+          description: "Server run by the main developers of the project <img draggable=\"false\" alt=\"\U0001F418\" class=\"emojione\" src=\"https://mastodon.social/emoji/1f418.svg\" /> It is not focused on any particular niche interest - everyone is welcome as long as you follow our code of conduct!"
+          email: staff@mastodon.social
+          version: 3.0.1
+          urls:
+            streaming_api: 'wss://mastodon.social'
+          stats:
+            user_count: 415526
+            status_count: 17085754
+            domain_count: 11834
+          thumbnail: 'https://files.mastodon.social/site_uploads/files/000/000/001/original/vlcsnap-2018-08-27-16h43m11s127.png'
+          languages:
+            - en
+          registrations: true
+          approval_required: false
+          contact_account:
+            id: '1'
+            username: Gargron
+            acct: Gargron
+            display_name: Eugen
+            locked: false
+            bot: false
+            created_at: '2016-03-16T14:34:26.392Z'
+            note: '<p>Developer of Mastodon and administrator of mastodon.social. I post service announcements, development updates, and personal stuff.</p>'
+            url: 'https://mastodon.social/@Gargron'
+            avatar: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+            avatar_static: 'https://files.mastodon.social/accounts/avatars/000/000/001/original/d96d39a0abb45b92.jpg'
+            header: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+            header_static: 'https://files.mastodon.social/accounts/headers/000/000/001/original/c91b871f294ea63e.png'
+            followers_count: 317112
+            following_count: 453
+            statuses_count: 60903
+            last_status_at: '2019-11-26T21:14:44.522Z'
+            emojis: []
+            fields:
+              - name: Patreon
+                value: '<a href="https://www.patreon.com/mastodon" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://www.</span><span class="">patreon.com/mastodon</span><span class="invisible"></span}'
+                verified_at: null
+              - name: Homepage
+                value: '<a href="https://zeonfederated.com" rel="me nofollow noopener noreferrer" target="_blank"><span class="invisible">https://</span><span class="">zeonfederated.com</span><span class="invisible"></span}'
+                verified_at: '2019-07-15T18:29:57.191+00:00'
+    Marker:
+      title: Marker
+      x-stoplight:
+        id: u81wt8l4ongah
+      type: object
+      description: Represents the last read position with a user's timeline.
+      properties:
+        home:
+          type: object
+          description: Information about the user's position in the home timeline.
+          required:
+            - last_read_id
+            - updated_at
+            - version
+          properties:
+            last_read_id:
+              type: string
+              description: The ID of the most recently viewed entity.
+            updated_at:
+              type: string
+              description: The timestamp of when the marker was set.
+              format: date-time
+            version:
+              type: string
+              description: Used for locking to prevent write conflicts.
+        notifications:
+          type: object
+          required:
+            - last_read_id
+            - updated_at
+            - version
+          description: Information about the user's position in their notifications.
+          properties:
+            last_read_id:
+              type: string
+              description: The ID of the most recently viewed entity.
+            updated_at:
+              type: string
+              description: The timestamp of when the marker was set.
+              format: date-time
+            version:
+              type: number
+              description: Used for locking to prevent write conflicts.
+      required:
+        - home
+        - notifications
+    Notification:
+      title: Notification
+      x-stoplight:
+        id: hulmsnr7wpgy8
+      type: object
+      description: Represents a notification of an event relevant to the user.
+      properties:
+        id:
+          type: string
+          description: The id of the notification in the database.
+        type:
+          type: string
+          description: |-
+            The type of event that resulted in the notification.
+
+            - `follow` = Someone followed you.
+            - `follow_request` = Someone requested to follow you
+            - `mention` = Someone mentioned you in their status.
+            - `reblog` = Someone boosted one of your statuses
+            - `favourite` = Someone favourited one of your statuses
+            - `poll` = A poll you have voted in or created has ended.
+            - `status` = Someone you enabled notifications for has posted a status.
+          enum:
+            - follow
+            - follow_request
+            - mention
+            - reblog
+            - favourite
+            - poll
+            - status
+        created_at:
+          type: string
+          format: date-time
+          description: The timestamp of the notification.
+        account:
+          $ref: '#/components/schemas/Account'
+        status:
+          $ref: '#/components/schemas/Status'
+      required:
+        - id
+        - type
+        - created_at
+        - account
+    Preferences:
+      type: object
+      x-examples:
+        example-1:
+          'posting:default:visibility': public
+          'posting:default:sensitive': false
+          'posting:default:language': null
+          'reading:expand:media': default
+          'reading:expand:spoilers': false
+      examples:
+        - 'posting:default:visibility': public
+          'posting:default:sensitive': false
+          'posting:default:language': null
+          'reading:expand:media': default
+          'reading:expand:spoilers': false
+      properties:
+        'posting:default:visibility':
+          type: string
+          description: Default visibility for new posts. Equivalent to `Source#privacy`.
+        'posting:default:sensitive':
+          type: boolean
+          description: Default sensitivity flag for new posts. Equivalent to `Source#sensitive`.
+        'posting:default:language':
+          type:
+            - string
+            - 'null'
+          description: Default language for new posts. Equivalent to `Source#language`
+        'reading:expand:media':
+          type: string
+          description: |-
+            Whether media attachments should be automatically displayed or blurred / hidden.
+
+            - `default` = Hide media marked as sensitive.
+            - `show_all` = Always show all media by default, regardless of sensitivity.
+            - `hide_all` = Always hide all media by default, redgardless of sensitivity.
+          enum:
+            - default
+            - show_all
+            - hide_all
+        'reading:expand:spoilers':
+          type: boolean
+          description: Whether CWs should be expanded by default.
+      required:
+        - 'posting:default:visibility'
+        - 'posting:default:sensitive'
+        - 'reading:expand:media'
+        - 'reading:expand:spoilers'
+      description: Represents a user's preferences.
+    PushSubscription:
+      type: object
+      x-examples:
+        example-1:
+          id: 328183
+          endpoint: 'https://yourdomain.example/listener'
+          alerts:
+            follow: false
+            favourite: false
+            reblog: false
+            mention: true
+            poll: false
+          server_key: BCk-QqERU0q-CfYZjcuB6lnyyOYfJ2AifKqfeGIm7Z-HiTU5T9eTG5GxVA0_OH5mMlI4UkkDTpaZwozy0TzdZ2M=
+      description: Represents a subscription to the push streaming server.
+      properties:
+        id:
+          type: integer
+          description: The id of the push subscription in the database.
+        endpoint:
+          type: string
+          format: uri
+          description: Where push alerts will be sent to.
+        server_key:
+          type: string
+          description: The streaming server's VAPID key.
+        alerts:
+          type: object
+          description: Which alerts should be delivered to the `endpoint`.
+          required:
+            - follow
+            - favourite
+            - reblog
+            - mention
+            - poll
+          properties:
+            follow:
+              type: boolean
+              description: Receive a push notification when someone has followed you?
+            favourite:
+              type: boolean
+              description: Receive a push notification when a status you created has been favourited by someone else?
+            reblog:
+              type: boolean
+              description: Receive a push notification when someone else has mentioned you in a status?
+            mention:
+              type: boolean
+              description: Receive a push notification when a status you created has been boosted by someone else?
+            poll:
+              type: boolean
+              description: Receive a push notification when a poll you voted in or created has ended?
+      required:
+        - id
+        - endpoint
+        - server_key
+        - alerts
+      examples:
+        - id: 328183
+          endpoint: 'https://yourdomain.example/listener'
+          alerts:
+            follow: false
+            favourite: false
+            reblog: false
+            mention: true
+            poll: false
+          server_key: BCk-QqERU0q-CfYZjcuB6lnyyOYfJ2AifKqfeGIm7Z-HiTU5T9eTG5GxVA0_OH5mMlI4UkkDTpaZwozy0TzdZ2M=
+    Results-V1:
+      title: Results V1
+      x-stoplight:
+        id: 26g5rccbqr9ib
+      type: object
+      description: Represents the results of a search.
+      properties:
+        accounts:
+          type: array
+          description: Accounts which match the given query.
+          items:
+            $ref: '#/components/schemas/Account'
+        statuses:
+          type: array
+          description: Statuses which match the given query.
+          items:
+            $ref: '#/components/schemas/Status'
+        hashtags:
+          type: array
+          description: Hashtags which match the given query.
+          items:
+            type: string
+      required:
+        - accounts
+        - statuses
+        - hashtags
+    Results-V2:
+      title: Results-V2
+      x-stoplight:
+        id: 226sql6nvzsgq
+      type: object
+      properties:
+        accounts:
+          type: array
+          description: Accounts which match the given query.
+          items:
+            $ref: '#/components/schemas/Account'
+        statuses:
+          type: array
+          description: Statuses which match the given query.
+          items:
+            $ref: '#/components/schemas/Status'
+        hashtags:
+          type:
+            - string
+            - array
+          description: Hashtags which match the given query.
+          items:
+            $ref: '#/components/schemas/Tag'
+      required:
+        - accounts
+        - statuses
+        - hashtags
+      description: Represents the results of a search.
   requestBodies: {}
   securitySchemes:
     user-token-auth:
